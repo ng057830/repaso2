@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>MathMaster Pro</title>
+    <!-- Incluir Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <!-- Incluir MathJax -->
+    <script type="text/javascript">
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 0;
+        }
+        .game-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        /* Pantallas */
+        #menuScreen, #gameScreen {
+            display: none;
+        }
+        #menuScreen.active, #gameScreen.active {
+            display: block;
+        }
+        /* Botones */
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            margin: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .option-btn {
+            background-color: #2196F3;
+            margin: 5px;
+            width: 80%;
+        }
+        .option-btn:hover {
+            background-color: #0b7dda;
+        }
+        .hint-btn {
+            background-color: #FFA500;
+            margin: 5px;
+        }
+        .hint-btn:hover {
+            background-color: #ff8c00;
+        }
+        /* Texto y contenedores */
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        #problemDisplay {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        #stepContainer {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        #optionsContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #feedbackContainer p {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        /* Responsive */
+        @media (max-width: 600px) {
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+            .option-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div id="menuScreen" class="active">
+            <h1>MathMaster Pro</h1>
+            <button class="btn" onclick="startGame('section1')">Operaciones Básicas</button>
+            <button class="btn" onclick="startGame('section2')">Operaciones Complejas</button>
+            <button class="btn" onclick="startGame('section3')">Mínimo Común Múltiplo</button>
+            <button class="btn" onclick="startGame('section4')">Máximo Común Divisor</button>
+        </div>
+        
+        <div id="gameScreen">
+            <div id="problemDisplay"></div>
+            <div id="stepContainer"></div>
+            <div id="optionsContainer"></div>
+            <div id="hintContainer"></div>
+            <div id="feedbackContainer"></div>
+            <button onclick="goToMenu()" class="btn">Menú Principal</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        const problems = {
+            section1: [
+                {
+                    problem: "Calcula: \\(15 - 7 \\times 2 + 4\\)",
+                    steps: [
+                        {
+                            description: "Realiza primero la multiplicación",
+                            type: "multiple-choice",
+                            options: ["\\(15 - 14 + 4\\)", "\\(15 - 7 + 4\\)", "\\(15 - 21 + 4\\)", "\\(15 + 14 - 4\\)"],
+                            correctOptionIndex: 0,
+                            hints: ["Recuerda la prioridad de operaciones: multiplicación primero", "\\(7 \\times 2 = 14\\)"]
+                        },
+                        {
+                            description: "Realiza las operaciones de izquierda a derecha",
+                            type: "multiple-choice",
+                            options: ["\\(1 + 4\\)", "\\(15 - 14 = 1\\)", "\\(15 - 14 + 4 = 5\\)", "\\(14 - 15 + 4\\)"],
+                            correctOptionIndex: 2,
+                            hints: ["Resta primero", "Luego suma", "\\(15 - 14 = 1\\), luego \\(1 + 4 = 5\\)"]
+                        }
+                    ]
+                },
+                // Agregué más problemas a la sección 1
+                {
+                    problem: "Calcula: \\(12 + 3 \\times 5 - 2\\)",
+                    steps: [
+                        {
+                            description: "Realiza primero la multiplicación",
+                            type: "multiple-choice",
+                            options: ["\\(12 + 15 - 2\\)", "\\(12 - 15 + 3\\)", "\\(12 - 3 \\times 5 + 2\\)", "\\(12 + 3 - 15\\)"],
+                            correctOptionIndex: 0,
+                            hints: ["Multiplica primero", "\\(3 \\times 5 = 15\\)"]
+                        },
+                        {
+                            description: "Realiza las operaciones de izquierda a derecha",
+                            type: "multiple-choice",
+                            options: ["\\(27 - 2 = 25\\)", "\\(12 + 15 - 2 = 25\\)", "\\(12 + 15 + 2 = 29\\)", "\\(12 - 15 + 2\\)"],
+                            correctOptionIndex: 1,
+                            hints: ["Suma después de multiplicar", "\\(12 + 15 = 27\\), luego \\(27 - 2 = 25\\)"]
+                        }
+                    ]
+                },
+                {
+                    problem: "Calcula: \\(20 - 4 \\times 3 + 6\\)",
+                    steps: [
+                        {
+                            description: "Realiza primero la multiplicación",
+                            type: "multiple-choice",
+                            options: ["\\(20 - 12 + 6\\)", "\\(20 - 4 + 6\\)", "\\(20 + 12 - 6\\)", "\\(20 \\times 3 - 12\\)"],
+                            correctOptionIndex: 0,
+                            hints: ["Multiplicación tiene prioridad", "\\(4 \\times 3 = 12\\)"]
+                        },
+                        {
+                            description: "Realiza las operaciones de izquierda a derecha",
+                            type: "multiple-choice",
+                            options: ["\\(8 + 6 = 14\\)", "\\(20 - 12 = 8\\)", "\\(20 - 12 + 6 = 14\\)", "\\(12 - 20 + 6\\)"],
+                            correctOptionIndex: 2,
+                            hints: ["Resta primero", "Luego suma", "\\(20 - 12 = 8\\), luego \\(8 + 6 = 14\\)"]
+                        }
+                    ]
+                }
+            ],
+            section2: [
+        {
+            problem: "Calcula: \\(2 + 4(5 - 4) - 4(-8 - (-7 + (-9))) + 1\\)",
+            steps: [
+                {
+                    description: "Paso 1: Resuelve los paréntesis más internos \\((-7 + (-9))\\). ¿Cuál es el resultado?",
+                    type: "multiple-choice",
+                    options: [
+                        "\\(-16\\)",
+                        "\\(2\\)",
+                        "\\(-7 - 9 = -2\\)",
+                        "\\(16\\)"
+                    ],
+                    correctOptionIndex: 0,
+                    hints: [
+                        "Suma los números negativos.",
+                        "Al sumar dos números negativos, sumamos sus valores absolutos y el resultado es negativo.",
+                        "\\(-7 + (-9) = -16\\)"
+                    ]
+                },
+                {
+                    description: "Paso 2: Calcula \\(-8 - (-16)\\). ¿Cuál es el resultado?",
+                    type: "multiple-choice",
+                    options: [
+                        "\\(-8 + 16 = 8\\)",
+                        "\\(-8 - 16 = -24\\)",
+                        "\\(-8 + (-16) = -24\\)",
+                        "\\(8\\)"
+                    ],
+                    correctOptionIndex: 0,
+                    hints: [
+                        "Restar un número negativo es lo mismo que sumar su opuesto.",
+                        "\\(-8 - (-16) = -8 + 16\\)",
+                        "\\(-8 + 16 = 8\\)"
+                    ]
+                },
+                {
+                    description: "Paso 3: Calcula \\(-4 \\times 8\\). ¿Cuál es el resultado?",
+                    type: "multiple-choice",
+                    options: [
+                        "\\(-32\\)",
+                        "\\(32\\)",
+                        "\\(-12\\)",
+                        "\\(12\\)"
+                    ],
+                    correctOptionIndex: 0,
+                    hints: [
+                        "Multiplica el coeficiente por el resultado anterior.",
+                        "Un número negativo por un positivo es negativo.",
+                        "\\(-4 \\times 8 = -32\\)"
+                    ]
+                },
+                {
+                    description: "Paso 4: Calcula \\(5 - 4\\). ¿Cuál es el resultado?",
+                    type: "multiple-choice",
+                    options: [
+                        "\\(1\\)",
+                        "\\(-1\\)",
+                        "\\(9\\)",
+                        "\\(-9\\)"
+                    ],
+                    correctOptionIndex: 0,
+                    hints: [
+                        "Resta los números.",
+                        "\\(5 - 4 = 1\\)"
+                    ]
+                },
+                {
+                    description: "Paso 5: Calcula \\(4 \\times 1\\). ¿Cuál es el resultado?",
+                    type: "multiple-choice",
+                    options: [
+                        "\\(4\\)",
+                        "\\(-4\\)",
+                        "\\(5\\)",
+                        "\\(-5\\)"
+                    ],
+                    correctOptionIndex: 0,
+                    hints: [
+                        "Multiplica los números.",
+                        "\\(4 \\times 1 = 4\\)"
+                    ]
+                },
+                {
+                    description: "Paso 6: Sustituye los resultados obtenidos en la expresión original y simplifica: \\(2 + 4 - 32 + 1\\). ¿Cuál es el resultado?",
+                    type: "multiple-choice",
+                    options: [
+                        "\\(-25\\)",
+                        "\\(39\\)",
+                        "\\(65\\)",
+                        "\\(-39\\)"
+                    ],
+                    correctOptionIndex: 0,
+                    hints: [
+                        "Suma y resta los números en orden.",
+                        "\\(2 + 4 = 6\\)",
+                        "\\(6 - 32 = -26\\)",
+                        "\\(-26 + 1 = -25\\)"
+                    ]
+                }
+            ]
+        }
+    ]
+,
+            section3: [
+                {
+                    problem: "Encuentra el Mínimo Común Múltiplo (MCM) de \\(15\\) y \\(20\\)",
+                    steps: [
+                        {
+                            description: "Factores primos de \\(15\\)",
+                            type: "multiple-choice",
+                            options: ["\\(3 \\times 5\\)", "\\(3^2 \\times 5\\)", "\\(5 \\times 3\\)", "\\(3 \\times 3 \\times 5\\)"],
+                            correctOptionIndex: 0,
+                            hints: ["15 = 3 × 5", "Descompón en factores primos"]
+                        },
+                        {
+                            description: "Factores primos de \\(20\\)",
+                            type: "multiple-choice",
+                            options: ["\\(2^2 \\times 5\\)", "\\(2 \\times 10\\)", "\\(5 \\times 4\\)", "\\(2 \\times 2 \\times 5\\)"],
+                            correctOptionIndex: 0,
+                            hints: ["20 = 2 × 2 × 5", "Escribe en forma de potencias"]
+                        },
+                        {
+                            description: "Calcula el MCM",
+                            type: "multiple-choice",
+                            options: ["\\(2^2 \\times 3 \\times 5 = 60\\)", "\\(2 \\times 3 \\times 5 = 30\\)", "\\(2^2 \\times 5 = 20\\)", "\\(3 \\times 5 = 15\\)"],
+                            correctOptionIndex: 0,
+                            hints: ["Toma el mayor exponente de cada factor primo", "\\(2^2 = 4\\), entonces \\(4 \\times 3 \\times 5 = 60\\)"]
+                        }
+                    ]
+                },
+                // Puedes agregar más problemas a la sección 3 siguiendo el mismo formato
+            ],
+            section4: [
+                {
+                    problem: "Encuentra el Máximo Común Divisor (MCD) de \\(24\\) y \\(36\\)",
+                    steps: [
+                        {
+                            description: "Factores primos de \\(24\\)",
+                            type: "multiple-choice",
+                            options: ["\\(2^3 \\times 3\\)", "\\(2^2 \\times 3\\)", "\\(2 \\times 3^2\\)", "\\(2 \\times 3\\)"],
+                            correctOptionIndex: 0,
+                            hints: ["24 = 2 × 2 × 2 × 3", "Descompón en factores primos"]
+                        },
+                        {
+                            description: "Factores primos de \\(36\\)",
+                            type: "multiple-choice",
+                            options: ["\\(2^2 \\times 3^2\\)", "\\(2 \\times 3^2\\)", "\\(2^3 \\times 3\\)", "\\(2 \\times 3\\)"],
+                            correctOptionIndex: 0,
+                            hints: ["36 = 2 × 2 × 3 × 3", "Descompón en factores primos"]
+                        },
+                        {
+                            description: "Calcula el MCD",
+                            type: "multiple-choice",
+                            options: ["\\(2^2 \\times 3 = 12\\)", "\\(2 \\times 3 = 6\\)", "\\(2^3 = 8\\)", "\\(3^2 = 9\\)"],
+                            correctOptionIndex: 0,
+                            hints: ["Toma los factores comunes con el menor exponente", "\\(MCD = 2^2 \\times 3 = 12\\)"]
+                        }
+                    ]
+                }
+                // Puedes agregar más problemas a la sección 4 siguiendo el mismo formato
+            ]
+        };
+
+        let currentSection = '';
+        let currentProblemIndex = 0;
+        let currentStepIndex = 0;
+        let currentProblem = null;
+
+        function startGame(section) {
+            currentSection = section;
+            currentProblemIndex = 0;
+            currentStepIndex = 0;
+            currentProblem = problems[section][currentProblemIndex];
+
+            document.getElementById('menuScreen').classList.remove('active');
+            document.getElementById('gameScreen').classList.add('active');
+
+            displayProblem();
+        }
+
+        function displayProblem() {
+            const problemDisplay = document.getElementById('problemDisplay');
+            problemDisplay.innerHTML = `<strong>Problema:</strong> ${currentProblem.problem}`;
+            
+            const stepContainer = document.getElementById('stepContainer');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const hintContainer = document.getElementById('hintContainer');
+            const feedbackContainer = document.getElementById('feedbackContainer');
+            
+            stepContainer.innerHTML = ''; 
+            optionsContainer.innerHTML = '';
+            hintContainer.innerHTML = '';
+            feedbackContainer.innerHTML = '';
+
+            currentStepIndex = 0;
+            displayNextStep();
+
+            MathJax.typesetPromise();
+        }
+
+        function displayNextStep() {
+            const currentStep = currentProblem.steps[currentStepIndex];
+            const stepContainer = document.getElementById('stepContainer');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const hintContainer = document.getElementById('hintContainer');
+            const feedbackContainer = document.getElementById('feedbackContainer');
+
+            stepContainer.innerHTML = `<p><strong>Paso ${currentStepIndex + 1}:</strong> ${currentStep.description}</p>`;
+            feedbackContainer.innerHTML = '';
+            hintContainer.innerHTML = `<button class="btn hint-btn" onclick="showHint()">Pista</button>`;
+            
+            if (currentStep.type === 'multiple-choice') {
+                optionsContainer.innerHTML = currentStep.options.map((option, index) => 
+                    `<button class="btn option-btn" onclick="checkAnswer(${index})">${option}</button>`
+                ).join('');
+            }
+
+            MathJax.typesetPromise();
+        }
+
+        function showHint() {
+            const currentStep = currentProblem.steps[currentStepIndex];
+            const hintContainer = document.getElementById('hintContainer');
+            
+            if (currentStep.hints && currentStep.hints.length > 0) {
+                hintContainer.innerHTML += `<p style="color: blue;">${currentStep.hints.shift()}</p>`;
+                MathJax.typesetPromise();
+            } else {
+                hintContainer.innerHTML += `<p style="color: blue;">No hay más pistas disponibles.</p>`;
+            }
+        }
+
+        function checkAnswer(selectedOptionIndex) {
+            const currentStep = currentProblem.steps[currentStepIndex];
+            const feedbackContainer = document.getElementById('feedbackContainer');
+
+            if (selectedOptionIndex === currentStep.correctOptionIndex) {
+                feedbackContainer.innerHTML = '<p style="color: green;">¡Correcto!</p>';
+                
+                if (currentStepIndex < currentProblem.steps.length - 1) {
+                    currentStepIndex++;
+                    setTimeout(displayNextStep, 1500);
+                } else {
+                    feedbackContainer.innerHTML += '<p>¡Has completado el problema!</p>';
+                }
+            } else {
+                feedbackContainer.innerHTML = `<p style="color: red;">Incorrecto. Intenta de nuevo.</p>`;
+            }
+
+            MathJax.typesetPromise();
+        }
+
+        function goToMenu() {
+            document.getElementById('menuScreen').classList.add('active');
+            document.getElementById('gameScreen').classList.remove('active');
+            resetGame();
+        }
+
+        function resetGame() {
+            currentSection = '';
+            currentProblemIndex = 0;
+            currentStepIndex = 0;
+            currentProblem = null;
+        }
+    </script>
+</body>
+</html>
